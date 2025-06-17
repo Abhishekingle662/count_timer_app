@@ -80,9 +80,11 @@ function App() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newCounter, setNewCounter] = useState({ name: '', goal: 1 });
   const [timer, setTimer] = useState({ running: false, time: 0, initial: 0 });
-  const [timerIntervalId, setTimerIntervalId] = useState<NodeJS.Timeout | null>(null);
+  const [intervalId, setIntervalId] = useState<number | null>(null);
+  const [timerIntervalId, setTimerIntervalId] = useState<number | null>(null);
   const [confettiId, setConfettiId] = useState<string | null>(null);
-  const confettiTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [stopwatch, setStopwatch] = useState({ running: false, time: 0 });
+  const confettiTimeout = useRef<number | null>(null);
 
   // Persist counters
   function saveCounters(newCounters: Counter[]) {
@@ -109,7 +111,7 @@ function App() {
         if (c.goal > 0 && newCount >= c.goal && c.count < c.goal) {
           setConfettiId(id);
           if (confettiTimeout.current) clearTimeout(confettiTimeout.current);
-          confettiTimeout.current = setTimeout(() => setConfettiId(null), 1800);
+          confettiTimeout.current = window.setTimeout(() => setConfettiId(null), 1800);
         }
         return { ...c, ...changes };
       }
@@ -122,37 +124,58 @@ function App() {
     saveCounters(counters.filter(c => c.id !== id));
   }
 
-  // Timer logic
+  function startStopwatch() {
+    if (intervalId) return;
+    setStopwatch(s => ({ ...s, running: true }));
+    const id = window.setInterval(() => {
+      setStopwatch(s => ({ ...s, time: s.time + 1 }));
+    }, 1000);
+    setIntervalId(id);
+  }
+  function pauseStopwatch() {
+    if (intervalId) window.clearInterval(intervalId);
+    setIntervalId(null);
+    setStopwatch(s => ({ ...s, running: false }));
+  }
+  function resetStopwatch() {
+    if (intervalId) window.clearInterval(intervalId);
+    setIntervalId(null);
+    setStopwatch({ running: false, time: 0 });
+  }
   function startTimer() {
     if (timerIntervalId || timer.time <= 0) return;
     setTimer(t => ({ ...t, running: true }));
-    const id = setInterval(() => {
+    const id = window.setInterval(() => {
       setTimer(t => {
         if (t.time > 0) return { ...t, time: t.time - 1 };
-        clearInterval(id);
+        window.clearInterval(id);
         return { ...t, running: false, time: 0 };
       });
     }, 1000);
     setTimerIntervalId(id);
   }
   function pauseTimer() {
-    if (timerIntervalId) clearInterval(timerIntervalId);
+    if (timerIntervalId) window.clearInterval(timerIntervalId);
     setTimerIntervalId(null);
     setTimer(t => ({ ...t, running: false }));
   }
   function resetTimer() {
-    if (timerIntervalId) clearInterval(timerIntervalId);
+    if (timerIntervalId) window.clearInterval(timerIntervalId);
     setTimerIntervalId(null);
     setTimer(t => ({ ...t, running: false, time: t.initial }));
   }
   function setTimerValue(seconds: number) {
-    if (timerIntervalId) clearInterval(timerIntervalId);
+    if (timerIntervalId) window.clearInterval(timerIntervalId);
     setTimerIntervalId(null);
     setTimer({ running: false, time: seconds, initial: seconds });
   }
   useEffect(() => {
-    return () => { if (timerIntervalId) clearInterval(timerIntervalId); };
-  }, [timerIntervalId]);
+    return () => {
+      if (intervalId) window.clearInterval(intervalId);
+      if (confettiTimeout.current) window.clearTimeout(confettiTimeout.current);
+      if (timerIntervalId) window.clearInterval(timerIntervalId);
+    };
+  }, [intervalId, timerIntervalId]);
 
   // Mobile-first UI
   return (
