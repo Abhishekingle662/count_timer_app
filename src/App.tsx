@@ -72,6 +72,18 @@ function Confetti({ show }: { show: boolean }) {
   );
 }
 
+interface Todo {
+  id: string;
+  text: string;
+  completed: boolean;
+  date: string; // YYYY-MM-DD
+}
+
+function getToday() {
+  const d = new Date();
+  return d.toISOString().slice(0, 10);
+}
+
 function App() {
   const [counters, setCounters] = useState<Counter[]>(() => {
     const saved = localStorage.getItem('counters');
@@ -82,7 +94,21 @@ function App() {
   const [timer, setTimer] = useState({ running: false, time: 0, initial: 0 });
   const [timerIntervalId, setTimerIntervalId] = useState<number | null>(null);
   const [confettiId, setConfettiId] = useState<string | null>(null);
+  const [todos, setTodos] = useState<Todo[]>(() => {
+    const saved = localStorage.getItem('todos');
+    if (!saved) return [];
+    const parsed: Todo[] = JSON.parse(saved);
+    // Only show today's todos
+    return parsed.filter(t => t.date === getToday());
+  });
+  const [newTodo, setNewTodo] = useState('');
+  const [editingTodoId, setEditingTodoId] = useState<string | null>(null);
+  const [editingTodoText, setEditingTodoText] = useState('');
   const confettiTimeout = useRef<number | null>(null);
+  const [quote, setQuote] = useState<string | null>(null);
+  const [quoteAuthor, setQuoteAuthor] = useState<string | null>(null);
+  const [quoteLoading, setQuoteLoading] = useState(true);
+  const [quoteError, setQuoteError] = useState(false);
 
   // Persist counters
   function saveCounters(newCounters: Counter[]) {
@@ -169,6 +195,43 @@ function App() {
     saveCounters([...counters, counter]);
   }
 
+  // Persist todos for today only
+  function saveTodos(newTodos: Todo[]) {
+    setTodos(newTodos);
+    localStorage.setItem('todos', JSON.stringify(newTodos));
+  }
+
+  function addTodo() {
+    if (!newTodo.trim()) return;
+    const todo: Todo = {
+      id: Date.now().toString(),
+      text: newTodo,
+      completed: false,
+      date: getToday(),
+    };
+    saveTodos([...todos, todo]);
+    setNewTodo('');
+  }
+
+  function toggleTodo(id: string) {
+    saveTodos(todos.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
+  }
+
+  function removeTodo(id: string) {
+    saveTodos(todos.filter(t => t.id !== id));
+  }
+
+  function startEditTodo(id: string, text: string) {
+    setEditingTodoId(id);
+    setEditingTodoText(text);
+  }
+
+  function saveEditTodo(id: string) {
+    saveTodos(todos.map(t => t.id === id ? { ...t, text: editingTodoText } : t));
+    setEditingTodoId(null);
+    setEditingTodoText('');
+  }
+
   // Request notification permission on load
   useEffect(() => {
     if (Notification && Notification.permission === 'default') {
@@ -202,12 +265,48 @@ function App() {
     }
   }, []);
 
+  // Fetch a random motivational quote on app load
+  useEffect(() => {
+    setQuoteLoading(true);
+    setQuoteError(false);
+    fetch('https://type.fit/api/quotes')
+      .then(res => res.json())
+      .then((data: Array<{text: string, author: string}>) => {
+        if (Array.isArray(data) && data.length > 0) {
+          const random = data[Math.floor(Math.random() * data.length)];
+          setQuote(random.text);
+          setQuoteAuthor(random.author || 'Unknown');
+        } else {
+          setQuoteError(true);
+        }
+        setQuoteLoading(false);
+      })
+      .catch(() => {
+        setQuoteError(true);
+        setQuoteLoading(false);
+      });
+  }, []);
+
   // Mobile-first UI
   return (
     <div className="app-mobile">
       <header>
         <span className="plus-icon">+</span> <span>Goal Counters</span>
       </header>
+      <div style={{width: '100%', maxWidth: 480, margin: '0 auto', marginTop: '0.5em', marginBottom: '0.5em', padding: '0 1em'}}>
+        {quoteLoading ? (
+          <div style={{color: '#bbb', fontStyle: 'italic', fontSize: '1.1em'}}>Loading motivation...</div>
+        ) : quoteError ? (
+          <div style={{color: '#f44336', fontStyle: 'italic', fontSize: '1.1em'}}>Could not load quote.</div>
+        ) : quote ? (
+          <div style={{color: '#43a047', fontWeight: 600, fontSize: '1.15em', textAlign: 'center', marginBottom: '0.2em'}}>
+            “{quote}”
+            <div style={{color: '#bbb', fontWeight: 400, fontSize: '0.98em', marginTop: '0.2em'}}>
+              — {quoteAuthor}
+            </div>
+          </div>
+        ) : null}
+      </div>
       <main>
         <section className="counters">
           <h2>Counters</h2>
@@ -272,6 +371,55 @@ function App() {
             onSet={setTimerValue}
             initial={timer.initial}
           />
+        </section>
+        <section className="todos">
+          <h2>Todo List</h2>
+          <div className="add-todo">
+            <input
+              value={newTodo}
+              onChange={e => setNewTodo(e.target.value)}
+              placeholder="Add a new task..."
+              onKeyDown={e => { if (e.key === 'Enter') addTodo(); }}
+            />
+            <button onClick={addTodo}>Add</button>
+          </div>
+          <div className="todo-list">
+            {todos.length === 0 && <div className="todo-empty">No tasks for today</div>}
+            {todos.map(todo => (
+              <div className="todo-item" key={todo.id}>
+                <input
+                  type="checkbox"
+                  checked={todo.completed}
+                  onChange={() => toggleTodo(todo.id)}
+                />
+                {editingTodoId === todo.id ? (
+                  <>
+                    <input
+                      value={editingTodoText}
+                      onChange={e => setEditingTodoText(e.target.value)}
+                      onKeyDown={e => { if (e.key === 'Enter') saveEditTodo(todo.id); }}
+                      className="todo-edit-input"
+                    />
+                    <button onClick={() => saveEditTodo(todo.id)}>Save</button>
+                    <button onClick={() => setEditingTodoId(null)}>Cancel</button>
+                  </>
+                ) : (
+                  <>
+                    <span
+                      className={
+                        'todo-text' + (todo.completed ? ' todo-completed' : '')
+                      }
+                      onClick={() => toggleTodo(todo.id)}
+                    >
+                      {todo.text}
+                    </span>
+                    <button onClick={() => startEditTodo(todo.id, todo.text)}>Edit</button>
+                    <button onClick={() => removeTodo(todo.id)}>Remove</button>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
         </section>
       </main>
       <footer>
