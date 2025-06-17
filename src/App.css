@@ -61,35 +61,37 @@
   color: #fff;
   box-sizing: border-box;
 }
-header {
-  display: flex;
-  align-items: center;
-  gap: 0.5em;
-  padding: 1.2em 1em 1em 1em;
-  background: #111;
-  color: #fff;
-  font-size: 1.5em;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  border-bottom-left-radius: 1.5em;
-  border-bottom-right-radius: 1.5em;
-  box-shadow: 0 2px 12px #1976d233;
-}
-.plus-icon {
-  font-size: 2.2em;
-  font-weight: bold;
-  color: #fff;
-  background: #222;
-  border-radius: 50%;
-  width: 1.7em;
-  height: 1.7em;
+
+.quote-box {
+  width: 100vw;
+  max-width: 480px;
+  min-width: 320px;
+  margin: 0 auto 0.5em auto;
+  padding: 0 1em;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 0.5em;
-  box-shadow: 0 2px 8px #1976d244;
+  min-height: 80px;
+  box-sizing: border-box;
 }
-main {
+
+.quote-text {
+  color: #43a047;
+  font-weight: 600;
+  font-size: 1.15em;
+  text-align: center;
+  margin-bottom: 0.2em;
+  width: 100%;
+}
+
+.quote-author {
+  color: #bbb;
+  font-weight: 400;
+  font-size: 0.98em;
+  margin-top: 0.2em;
+}
+
+.main-section {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -101,9 +103,28 @@ main {
   align-items: center;
   box-sizing: border-box;
 }
-.counters, .timer-section {
+
+footer {
+  width: 100vw;
+  max-width: 480px;
+  min-width: 320px;
+  text-align: center;
+  padding: 1.2em 0.5em 1.5em 0.5em;
+  font-size: 1.1em;
+  color: #fff;
+  background: #111;
+  border-top: 1px solid #222;
+  border-bottom-left-radius: 1.5em;
+  border-bottom-right-radius: 1.5em;
+  box-shadow: 0 -2px 12px #111a;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.counters, .timer-section, .todos {
   width: 100%;
-  max-width: 420px;
+  max-width: 440px;
+  min-width: 320px;
   margin-left: auto;
   margin-right: auto;
   background: #181818;
@@ -112,7 +133,9 @@ main {
   box-shadow: 0 2px 12px #1976d211;
   padding: 1.2em 1em 1em 1em;
   margin-bottom: 0.5em;
+  box-sizing: border-box;
 }
+
 .counter-list {
   width: 100%;
   display: flex;
@@ -246,7 +269,7 @@ main {
   padding: 1.2em 1em 1em 1em;
   margin-top: 1em;
   width: 100%;
-  max-width: 420px;
+  max-width: 440px;
   margin-left: auto;
   margin-right: auto;
 }
@@ -312,7 +335,8 @@ main {
 }
 footer {
   width: 100vw;
-  max-width: 100vw;
+  max-width: 480px;
+  min-width: 320px;
   text-align: center;
   padding: 1.2em 0.5em 1.5em 0.5em;
   font-size: 1.1em;
@@ -322,6 +346,8 @@ footer {
   border-bottom-left-radius: 1.5em;
   border-bottom-right-radius: 1.5em;
   box-shadow: 0 -2px 12px #111a;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 .confetti {
   position: absolute;
@@ -501,26 +527,12 @@ footer {
   box-shadow: 0 2px 8px #43a04777;
 }
 @media (max-width: 600px) {
-  #root, .app-mobile, main, .counters, .timer-section, footer {
+  .app-mobile, .main-section, .quote-box, .footer-section, .counters, .timer-section, .todos {
     max-width: 100vw;
     width: 100vw;
     min-width: 100vw;
     box-sizing: border-box;
     margin: 0;
-    padding-left: 0;
-    padding-right: 0;
-  }
-  .app-mobile {
-    padding: 0;
-  }
-  main {
-    padding: 0.5em 0.1em 0.1em 0.1em;
-  }
-  .counters, .timer-section {
-    padding: 0.7em 0.3em 0.7em 0.3em;
-  }
-  header, footer {
-    border-radius: 0;
     padding-left: 0.5em;
     padding-right: 0.5em;
   }
