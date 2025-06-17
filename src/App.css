@@ -134,13 +134,12 @@ footer {
   box-sizing: border-box;
 }
 
-.counter-list {
+.counter-list, .todo-list {
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 0.7em;
+  min-width: 0;
+  box-sizing: border-box;
 }
-.counter-item {
+.counter-item, .todo-item {
   position: relative;
   width: 100%;
   display: flex;
@@ -152,16 +151,19 @@ footer {
   padding: 0.6em 0.8em;
   box-shadow: 0 1px 4px #111;
   transition: box-shadow 0.2s;
+  flex-wrap: wrap;
+  word-break: break-word;
+  overflow: hidden;
+  min-width: 0;
 }
 .counter-item:active {
   box-shadow: 0 2px 8px #1976d233;
 }
-.counter-name {
-  flex: 1;
-  font-weight: 600;
-  font-size: 1.1em;
-  color: #fff;
-  text-align: left;
+.counter-name, .todo-text {
+  flex: 1 1 0;
+  min-width: 0;
+  word-break: break-word;
+  overflow: hidden;
 }
 .counter-progress {
   font-size: 1em;
@@ -170,7 +172,7 @@ footer {
   text-align: right;
   font-weight: 500;
 }
-.counter-item button {
+.counter-item button, .todo-item button {
   background: #333;
   color: #fff;
   border: none;
@@ -180,6 +182,11 @@ footer {
   margin-left: 0.2em;
   box-shadow: 0 1px 4px #1976d211;
   transition: background 0.2s, box-shadow 0.2s;
+  max-width: 90px;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .counter-item button:hover {
   background: #444;
@@ -470,6 +477,10 @@ footer {
   border: 1.5px solid #292929;
   min-height: 3.2em;
   font-size: 1.1em;
+  flex-wrap: wrap;
+  word-break: break-word;
+  overflow: hidden;
+  min-width: 0;
 }
 .todo-item input[type="checkbox"] {
   accent-color: #43a047;
