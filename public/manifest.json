@@ -1,0 +1,21 @@
+{
+  "name": "Counter Timer App",
+  "short_name": "Count+Timer",
+  "description": "A mobile-first PWA for tracking goals with counters and a stopwatch.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1976d2",
+  "icons": [
+    {
+      "src": "plus-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "plus-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
