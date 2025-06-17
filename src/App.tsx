@@ -156,6 +156,52 @@ function App() {
     };
   }, [timerIntervalId]);
 
+  // Add a template counter for cold msg/reach out
+  function addTemplateCounter() {
+    const exists = counters.some(c => c.name === 'Cold Msg/Reach Out');
+    if (exists) return;
+    const counter: Counter = {
+      id: Date.now().toString(),
+      name: 'Cold Msg/Reach Out',
+      goal: 25,
+      count: 0,
+    };
+    saveCounters([...counters, counter]);
+  }
+
+  // Request notification permission on load
+  useEffect(() => {
+    if (Notification && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  // Schedule a notification for the next morning and every 24h
+  useEffect(() => {
+    if (Notification && Notification.permission === 'granted') {
+      // Clear any previous timeouts
+      let timeoutId: number | null = null;
+      function scheduleNextNotification() {
+        const now = new Date();
+        const nextMorning = new Date(now);
+        nextMorning.setHours(8, 0, 0, 0); // 8:00 AM
+        if (now > nextMorning) {
+          nextMorning.setDate(nextMorning.getDate() + 1);
+        }
+        const msUntilNext = nextMorning.getTime() - now.getTime();
+        timeoutId = window.setTimeout(() => {
+          new Notification('Daily Reminder', {
+            body: 'Don’t forget to complete your counters and reach your goals today!'
+          });
+          // Schedule the next notification in 24h
+          timeoutId = window.setTimeout(scheduleNextNotification, 24 * 60 * 60 * 1000);
+        }, msUntilNext);
+      }
+      scheduleNextNotification();
+      return () => { if (timeoutId) window.clearTimeout(timeoutId); };
+    }
+  }, []);
+
   // Mobile-first UI
   return (
     <div className="app-mobile">
@@ -165,6 +211,9 @@ function App() {
       <main>
         <section className="counters">
           <h2>Counters</h2>
+          <button className="template-btn" onClick={addTemplateCounter}>
+            + Add Cold Msg/Reach Out (25)
+          </button>
           <div className="counter-list">
             {counters.length === 0 && <div className="counter-empty">No counters</div>}
             {counters.map(counter => (
