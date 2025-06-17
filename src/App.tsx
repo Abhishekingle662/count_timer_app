@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
 import './App.css'
 import Widget from './widget';
+import { useState, useEffect, useRef } from 'react';
 
 interface Counter {
   id: string;
@@ -80,10 +80,8 @@ function App() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newCounter, setNewCounter] = useState({ name: '', goal: 1 });
   const [timer, setTimer] = useState({ running: false, time: 0, initial: 0 });
-  const [intervalId, setIntervalId] = useState<number | null>(null);
   const [timerIntervalId, setTimerIntervalId] = useState<number | null>(null);
   const [confettiId, setConfettiId] = useState<string | null>(null);
-  const [stopwatch, setStopwatch] = useState({ running: false, time: 0 });
   const confettiTimeout = useRef<number | null>(null);
 
   // Persist counters
@@ -124,24 +122,6 @@ function App() {
     saveCounters(counters.filter(c => c.id !== id));
   }
 
-  function startStopwatch() {
-    if (intervalId) return;
-    setStopwatch(s => ({ ...s, running: true }));
-    const id = window.setInterval(() => {
-      setStopwatch(s => ({ ...s, time: s.time + 1 }));
-    }, 1000);
-    setIntervalId(id);
-  }
-  function pauseStopwatch() {
-    if (intervalId) window.clearInterval(intervalId);
-    setIntervalId(null);
-    setStopwatch(s => ({ ...s, running: false }));
-  }
-  function resetStopwatch() {
-    if (intervalId) window.clearInterval(intervalId);
-    setIntervalId(null);
-    setStopwatch({ running: false, time: 0 });
-  }
   function startTimer() {
     if (timerIntervalId || timer.time <= 0) return;
     setTimer(t => ({ ...t, running: true }));
@@ -171,11 +151,10 @@ function App() {
   }
   useEffect(() => {
     return () => {
-      if (intervalId) window.clearInterval(intervalId);
       if (confettiTimeout.current) window.clearTimeout(confettiTimeout.current);
       if (timerIntervalId) window.clearInterval(timerIntervalId);
     };
-  }, [intervalId, timerIntervalId]);
+  }, [timerIntervalId]);
 
   // Mobile-first UI
   return (
